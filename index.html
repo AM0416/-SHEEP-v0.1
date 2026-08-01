@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#6f7f91">
+<title>SHEEP 服薬記録</title>
+<style>
+:root{
+  color-scheme:light dark;
+  --bg:#eef1f4;--panel:#fff;--text:#24313d;--muted:#687786;--border:#ccd4dc;
+  --accent:#6f7f91;--accent2:#536578;--warning:#fff6df;--danger:#9a4d4d;--ok:#557b62
+}
+@media(prefers-color-scheme:dark){
+  :root{--bg:#151a1f;--panel:#20272e;--text:#eef3f7;--muted:#aeb8c2;--border:#3d4853;--accent:#93a4b5;--accent2:#b2c0cd;--warning:#312d23;--ok:#8fb09a}
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic",sans-serif;background:var(--bg);color:var(--text)}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer;border:1px solid var(--border);border-radius:12px;padding:10px 14px;background:var(--panel);color:var(--text)}
+button.primary{background:var(--accent);color:white;border-color:var(--accent)}
+button.primary:hover{background:var(--accent2)}
+button.danger{color:var(--danger)}
+button:disabled{opacity:.5;cursor:not-allowed}
+input,select,textarea{width:100%;border:1px solid var(--border);border-radius:12px;padding:11px 12px;background:var(--panel);color:var(--text)}
+textarea{resize:vertical}
+label{display:grid;gap:6px;margin-bottom:12px}
+fieldset{border:1px solid var(--border);border-radius:14px;padding:12px;margin:0 0 14px}
+legend{padding:0 6px}
+.screen{max-width:1120px;margin:auto;padding:18px}
+.center{display:grid;place-items:center;min-height:100vh}
+.panel,.med-card,.list-item,.profile-card,.other-card{background:var(--panel);border:1px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px}
+.narrow{width:min(100%,480px)}
+.brand{display:flex;gap:12px;align-items:center}.brand .mark{font-size:2rem}.brand h1{margin:0}.brand p{margin:3px 0}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.tabs{display:flex;gap:8px;overflow:auto;margin:16px 0;padding-bottom:3px}.tab.active{background:var(--accent);color:white}.tab-panel{display:none}.tab-panel.active{display:block}
+.muted{color:var(--muted)}.small{font-size:.9rem}.status{min-height:1.2em}
+.section-head{display:flex;justify-content:space-between;gap:14px;align-items:end}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.wide{grid-column:1/-1}
+.slot-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.slot{border:1px solid var(--border);border-radius:12px;padding:8px;text-align:center}.slot-label{color:var(--muted);font-size:.85rem}
+.counter{display:grid;grid-template-columns:34px 1fr 34px;align-items:center;gap:4px}.counter button{padding:6px 0}.counter-value{font-weight:700}
+.med-title,.list-item-head,.total-row,.profile-row{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.badge{border:1px solid var(--border);border-radius:999px;padding:3px 8px;font-size:.82rem;color:var(--muted)}
+.choice{display:flex;grid-template-columns:auto 1fr;align-items:center;gap:8px}.choice input{width:auto}
+.warning{background:var(--warning)}
+.petra-message{border-left:4px solid var(--accent);padding:12px 14px;margin:0 0 14px;background:var(--panel);border-radius:0 12px 12px 0;line-height:1.65}
+.petra-message strong{display:block;margin-bottom:3px}
+.profile-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.profile-card{margin:0;text-align:left}.profile-button{width:100%;display:flex;align-items:center;gap:12px;border:none;background:transparent;padding:0;text-align:left}.profile-emoji{font-size:2rem}
+.inline-actions{display:flex;gap:8px;flex-wrap:wrap}.import-grid{display:grid;gap:10px}.import-card{border:1px solid var(--border);border-radius:14px;padding:12px}
+.hidden{display:none!important}.lock-note{padding:10px;border-radius:12px;background:var(--warning);margin-bottom:12px}
+.archive-label{color:var(--muted);font-size:.85rem}.ok{color:var(--ok)}.diff{color:var(--danger)}.guide-menu{display:flex;flex-direction:column;align-items:flex-start;gap:5px;font-size:.9rem;line-height:1.35}.guide-link{color:var(--text);text-decoration:none;padding:2px 0;text-align:left}.guide-link:hover,.guide-link:focus{text-decoration:underline;text-underline-offset:3px}.main-guide{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap}
+
+/* 利用者選択画面の文字レイアウト */
+.profile-home{position:relative;width:min(100%,680px);padding:40px 32px;border-radius:28px}
+.profile-home .guide-menu{position:absolute;top:26px;left:28px;right:auto}
+.profile-home-header{display:block;width:100%;padding-top:70px;text-align:center}
+.profile-home-title{margin:0;font-size:clamp(1.6rem,5vw,2.5rem);line-height:1.4;color:var(--text)}
+.profile-home-staff{display:block;margin:10px 0 0;font-size:1rem;line-height:1.5;color:var(--muted)}
+.profile-home .petra-message{margin-top:42px;margin-bottom:24px;padding:12px 14px 12px 22px;border-left-width:6px;font-size:1.15rem;line-height:1.9}
+.profile-home .petra-message strong{margin-bottom:8px}
+.profile-home #showAddProfileBtn{margin-top:36px;padding:16px 24px;font-size:1.05rem;border-radius:18px}
+.profile-home .user-limit{margin-top:28px}
+
+@media(max-width:760px){
+  header{align-items:flex-start;flex-direction:column}.main-guide{width:100%;align-items:flex-start}.main-guide>.guide-menu{width:100%;align-items:flex-start}  .section-head{flex-direction:column;align-items:stretch}.slot-grid{grid-template-columns:repeat(2,1fr)}
+  .form-grid{grid-template-columns:1fr}.wide{grid-column:auto}.profile-grid{grid-template-columns:1fr}
+  .profile-home{padding:28px 22px;border-radius:24px}
+  .profile-home .guide-menu{position:static;margin-right:auto;margin-bottom:28px}
+  .profile-home-header{clear:both;padding-top:0}
+  .profile-home-title{font-size:clamp(1.35rem,5.4vw,1.65rem);line-height:1.45}
+}
+</style>
+</head>
+<body>
+<main>
+<section id="profileScreen" class="screen center">
+  <div class="panel profile-home">
+    <nav class="guide-menu" aria-label="SHEEP案内">
+      <a class="guide-link" href="concept.html">🐑SHEEPとは</a>
+      <a class="guide-link" href="terms.html">🐑できること・できないこと（利用規約）</a>
+      <a class="guide-link" href="registration.html">🐑🌿ユーザー登録について</a>
+      <a class="guide-link" href="backup.html">🐑🌿バックアップについて</a>
+      <a class="guide-link" href="restore.html">🐑🌿バックアップデータをお持ちの方へ</a>
+    </nav>
+
+    <header class="profile-home-header">
+      <h1 class="profile-home-title">🐑 SHEEP 服薬記録システム🌿</h1>
+      <p class="profile-home-staff">担当SHEEP: ペトラ（Petra）</p>
+    </header>
+
+    <div id="profileGreeting" class="petra-message">
+      <strong>🐑ペトラ</strong>
+      こんにちは。<br>
+      記録する人を選んでください
+    </div>
+
+    <div id="profileList" class="profile-grid"></div>
+    <button id="showAddProfileBtn" class="primary">＋ 新しい利用者</button>
+    <p class="muted small user-limit">1つのアプリで最大4人まで利用できます。</p>
+  </div>
+</section>
+
+<section id="addProfileScreen" class="screen center hidden">
+  <div class="panel narrow">
+    <h2>新しい利用者</h2>
+    <label>表示名
+      <input id="newProfileName" maxlength="30" placeholder="HN・ニックネーム">
+    </label>
+    <label>絵文字
+      <input id="newProfileEmoji" maxlength="8" placeholder="🐑">
+    </label>
+    <fieldset>
+      <legend>利用区分</legend>
+      <label class="choice"><input type="radio" name="newProfileType" value="general" checked> 一般</label>
+      <label class="choice"><input type="radio" name="newProfileType" value="child"> 小学生以下</label>
+    </fieldset>
+    <p class="muted small">小学生以下のプロフィールには、4桁暗証番号を設定できません。</p>
+    <div class="inline-actions">
+      <button id="cancelAddProfileBtn">戻る</button>
+      <button id="createProfileBtn" class="primary">追加</button>
+    </div>
+    <p id="addProfileStatus" class="status"></p>
+  </div>
+</section>
+
+<section id="unlockScreen" class="screen center hidden">
+  <div class="panel narrow">
+    <div class="brand"><span id="unlockEmoji" class="mark">🐑</span><div><h1 id="unlockName">利用者</h1><p>4桁暗証番号</p></div></div>
+    <input id="unlockPasscode" type="password" inputmode="numeric" maxlength="4" autocomplete="current-password">
+    <div class="inline-actions" style="margin-top:12px">
+      <button id="cancelUnlockBtn">戻る</button>
+      <button id="unlockBtn" class="primary">開く</button>
+    </div>
+    <p id="unlockStatus" class="status"></p>
+  </div>
+</section>
+
+<section id="mainScreen" class="screen hidden">
+  <header>
+    <div class="brand"><span id="activeEmoji" class="mark">🐑</span><div><h1 id="activeName">利用者</h1><p id="jstDateLabel"></p></div></div>
+    <div class="main-guide">
+      <nav class="guide-menu" aria-label="SHEEP案内">
+      <a class="guide-link" href="concept.html">🐑SHEEPとは</a>
+      <a class="guide-link" href="terms.html">🐑できること・できないこと（利用規約）</a>
+      <a class="guide-link" href="registration.html">🐑🌿ユーザー登録について</a>
+      <a class="guide-link" href="backup.html">🐑🌿バックアップについて</a>
+      <a class="guide-link" href="restore.html">🐑🌿バックアップデータをお持ちの方へ</a>
+    </nav>
+      <div class="inline-actions">
+        <button id="switchProfileBtn">利用者変更</button>
+        <button id="lockBtn">ロック</button>
+      </div>
+    </div>
+  </header>
+
+  <div id="openGreeting" class="petra-message"></div>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="today">今日</button>
+    <button class="tab" data-tab="medications">薬の登録</button>
+    <button class="tab" data-tab="review">一日の記録</button>
+    <button class="tab" data-tab="archive">非表示・復元</button>
+    <button class="tab" data-tab="settings">設定</button>
+  </nav>
+
+  <section id="tab-today" class="tab-panel active">
+    <div class="section-head">
+      <div><h2>今日使った薬</h2><p class="muted">登録薬と「その他」を、実際に使った数で記録します。</p></div>
+      <label>服薬日<input id="medicationDay" type="date"></label>
+    </div>
+    <div id="medicationGrid"></div>
+
+    <div class="panel">
+      <h3>その他を記録</h3>
+      <p class="muted small">正式名を登録しなくても、「胃薬」「鎮痛剤」など自由に残せます。</p>
+      <div class="form-grid">
+        <label>名称<input id="otherLabel" placeholder="胃薬、鎮痛剤など"></label>
+        <label>時間帯
+          <select id="otherSlot"><option value="morning">朝</option><option value="noon">昼</option><option value="evening">夕</option><option value="bedtime">就寝前</option><option value="prn">頓用</option></select>
+        </label>
+        <label>使用数<input id="otherAmount" type="number" min="0.5" step="0.5" value="1"></label>
+        <label>単位
+          <select id="otherUnit"><option>錠</option><option>カプセル</option><option>包</option><option>mL</option><option>回</option></select>
+        </label>
+      </div>
+      <button id="addOtherBtn" class="primary">その他として追加</button>
+      <p id="otherStatus" class="status"></p>
+      <div id="otherList"></div>
+    </div>
+
+    <div class="panel">
+      <label>体調メモ<textarea id="dailyNote" rows="4" placeholder="必要なことだけ記録できます"></textarea></label>
+      <button id="saveTodayBtn" class="primary">今日の記録を保存</button>
+      <p id="todayStatus" class="status"></p>
+    </div>
+  </section>
+
+  <section id="tab-medications" class="tab-panel">
+    <h2>薬の登録</h2>
+
+    <div class="panel">
+      <h3>テキストから一括登録</h3>
+      <textarea id="bulkMedicationText" rows="7" placeholder="薬剤名｜規格｜1回量｜1日回数｜用法・備考"></textarea>
+      <button id="parseBulkMedicationBtn">候補を読み取る</button>
+      <p id="bulkMedicationStatus" class="status"></p>
+      <div id="bulkMedicationCandidates" class="import-grid"></div>
+      <button id="registerBulkMedicationBtn" class="primary hidden">確認した候補をまとめて登録</button>
+    </div>
+
+    <div class="panel">
+      <h3>OCR</h3>
+      <input id="ocrImage" type="file" accept="image/*">
+      <button id="runOcrBtn">画像から読み取る</button>
+      <p class="muted small">画像は保存しません。OCR結果は必ず原資料と照合してください。</p>
+      <textarea id="ocrText" rows="7"></textarea>
+      <button id="parseOcrBtn">候補を入力欄へ</button>
+      <p id="ocrStatus" class="status"></p>
+    </div>
+
+    <div class="panel">
+      <h3>手動登録</h3>
+      <div class="form-grid">
+        <label>薬剤名<input id="medName"></label>
+        <label>規格<input id="medStrength" placeholder="100mg"></label>
+        <label>分類
+          <select id="medCategory"><option value="prescribed">処方薬</option><option value="regular">常備薬</option><option value="other">その他</option></select>
+        </label>
+        <label>単位
+          <select id="medUnit"><option>錠</option><option>カプセル</option><option>包</option><option>mL</option><option>回</option></select>
+        </label>
+        <label>処方上の1日量<input id="medExpected" type="number" min="0" step="0.5" value="0"></label>
+        <label>用法・備考<input id="medInstructions"></label>
+      </div>
+      <button id="addMedicationBtn" class="primary">薬剤を登録</button>
+    </div>
+    <div id="registeredMedicationList"></div>
+  </section>
+
+  <section id="tab-review" class="tab-panel">
+    <h2>一日の終わりの記録</h2>
+    <div id="petraReviewMessage" class="petra-message"></div>
+    <div id="reviewSummary"></div>
+    <div class="panel">
+      <fieldset>
+        <legend>今日の状態</legend>
+        <label class="choice"><input type="radio" name="reviewStatus" value="as_prescribed"> 処方どおり</label>
+        <label class="choice"><input type="radio" name="reviewStatus" value="missed"> 飲み忘れた</label>
+        <label class="choice"><input type="radio" name="reviewStatus" value="excess"> 飲みすぎた</label>
+        <label class="choice"><input type="radio" name="reviewStatus" value="mixed"> 両方</label>
+        <label class="choice"><input type="radio" name="reviewStatus" value="unknown"> 未確認</label>
+      </fieldset>
+      <label>メモ<textarea id="reviewNote" rows="3"></textarea></label>
+      <button id="saveReviewBtn" class="primary">この内容で記録</button>
+      <p id="reviewStatusMessage" class="status"></p>
+    </div>
+  </section>
+
+  <section id="tab-archive" class="tab-panel">
+    <h2>非表示の薬・復元</h2>
+    <p class="muted">一覧から外した薬はここに残ります。過去記録との関連を保ったまま復元できます。</p>
+    <div id="archivedMedicationList"></div>
+  </section>
+
+  <section id="tab-settings" class="tab-panel">
+    <div class="panel">
+      <h2>プロフィール</h2>
+      <label>表示名<input id="editProfileName"></label>
+      <label>絵文字<input id="editProfileEmoji" maxlength="8"></label>
+      <button id="saveProfileBtn">プロフィールを保存</button>
+      <p id="profileSettingsStatus" class="status"></p>
+    </div>
+
+    <div class="panel">
+      <h2>4桁暗証番号</h2>
+      <div id="childPasscodeNotice" class="lock-note hidden">小学生以下のプロフィールには暗証番号を設定できません。</div>
+      <div id="passcodeGeneralControls">
+        <p id="passcodeStateText"></p>
+        <div id="enablePasscodeArea">
+          <label>新しい暗証番号<input id="newPasscode" type="password" inputmode="numeric" maxlength="4"></label>
+          <label>確認<input id="newPasscodeConfirm" type="password" inputmode="numeric" maxlength="4"></label>
+          <button id="enablePasscodeBtn">暗証番号をON</button>
+        </div>
+        <div id="disablePasscodeArea" class="hidden">
+          <label>現在の暗証番号<input id="currentPasscodeForDisable" type="password" inputmode="numeric" maxlength="4"></label>
+          <button id="disablePasscodeBtn">暗証番号をOFF</button>
+        </div>
+      </div>
+      <p id="passcodeSettingsStatus" class="status"></p>
+    </div>
+
+    <div class="panel">
+      <h2>通知用テキスト</h2>
+      <label>確認時刻<input id="reminderTime" type="time" value="21:00"></label>
+      <button id="copyReminderPromptBtn">ChatGPT用スケジュール文をコピー</button>
+      <textarea id="reminderPrompt" rows="4" readonly></textarea>
+    </div>
+
+    <div class="panel">
+      <h2>バックアップ</h2>
+      <button id="exportBtn">この利用者のバックアップを書き出す</button>
+      <label>バックアップを読み込む<input id="importFile" type="file" accept="application/json"></label>
+      <p id="backupStatus" class="status"></p>
+    </div>
+
+    <div class="panel warning">
+      <h2>注意</h2>
+      <p>暗証番号なしの場合、同じ端末を操作できる人が記録を開けます。端末本体の画面ロックを併用してください。</p>
+    </div>
+  </section>
+</section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"></script>
+<script>
+const HOUSE_KEY="sheep-household-v2";
+const SLOT_KEYS=["morning","noon","evening","bedtime","prn"];
+const SLOT_LABELS={morning:"朝",noon:"昼",evening:"夕",bedtime:"就寝前",prn:"頓用"};
+const $=id=>document.getElementById(id), te=new TextEncoder(), td=new TextDecoder();
+let household=loadHousehold(), activeProfileId=null, activeData=null, activeKey=null, pendingUnlockId=null, bulkCandidates=[];
+
+function defaultHousehold(){return{version:2,profiles:[]}}
+function emptyUserData(){return{medications:[],dailyLogs:{},dailyReviews:{},settings:{reminderTime:"21:00"},lastOpenedDay:null}}
+function loadHousehold(){try{return JSON.parse(localStorage.getItem(HOUSE_KEY))||defaultHousehold()}catch{return defaultHousehold()}}
+function saveHousehold(){localStorage.setItem(HOUSE_KEY,JSON.stringify(household))}
+function uid(){return crypto.randomUUID()}
+function esc(s=""){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+function rb(n){const b=new Uint8Array(n);crypto.getRandomValues(b);return b}
+function b64(b){return btoa(String.fromCharCode(...b))}
+function ub(s){return Uint8Array.from(atob(s),c=>c.charCodeAt(0))}
+function todayJst(){return new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Tokyo",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date())}
+function nowJst(){return new Intl.DateTimeFormat("sv-SE",{timeZone:"Asia/Tokyo",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit",hour12:false}).format(new Date()).replace(" ","T")+"+09:00"}
+async function deriveKey(pin,salt){const m=await crypto.subtle.importKey("raw",te.encode(pin),"PBKDF2",false,["deriveKey"]);return crypto.subtle.deriveKey({name:"PBKDF2",salt,iterations:250000,hash:"SHA-256"},m,{name:"AES-GCM",length:256},false,["encrypt","decrypt"])}
+async function encryptObj(obj,key){const iv=rb(12),ct=await crypto.subtle.encrypt({name:"AES-GCM",iv},key,te.encode(JSON.stringify(obj)));return{iv:b64(iv),ciphertext:b64(new Uint8Array(ct))}}
+async function decryptObj(payload,key){const pt=await crypto.subtle.decrypt({name:"AES-GCM",iv:ub(payload.iv)},key,ub(payload.ciphertext));return JSON.parse(td.decode(pt))}
+function getProfile(id){return household.profiles.find(p=>p.id===id)}
+async function persistActive(){
+  const p=getProfile(activeProfileId); if(!p||!activeData)return;
+  if(p.passcodeEnabled){p.payload=await encryptObj(activeData,activeKey);delete p.plainData}
+  else{p.plainData=activeData;delete p.payload}
+  p.updatedAt=nowJst();saveHousehold()
+}
+function showOnly(id){["profileScreen","addProfileScreen","unlockScreen","mainScreen"].forEach(x=>$(x).classList.toggle("hidden",x!==id))}
+function activeProfile(){return getProfile(activeProfileId)}
+
+function renderProfiles(){
+  const host=$("profileList");host.innerHTML="";
+  household.profiles.filter(p=>!p.archived).forEach(p=>{
+    const card=document.createElement("div");card.className="profile-card";
+    card.innerHTML=`<button class="profile-button" data-open="${p.id}">
+      <span class="profile-emoji">${esc(p.emoji||"🐑")}</span>
+      <span><strong>${esc(p.name)}</strong><br><span class="muted small">${p.type==="child"?"小学生以下":"一般"}${p.passcodeEnabled?"・暗証番号あり":""}</span></span>
+    </button>`;
+    host.appendChild(card)
+  });
+  $("showAddProfileBtn").disabled=household.profiles.filter(p=>!p.archived).length>=4;
+}
+async function openProfile(id){
+  const p=getProfile(id);if(!p)return;
+  if(p.passcodeEnabled){
+    pendingUnlockId=id;$("unlockEmoji").textContent=p.emoji||"🐑";$("unlockName").textContent=p.name;$("unlockPasscode").value="";$("unlockStatus").textContent="";showOnly("unlockScreen")
+  }else{
+    activeProfileId=id;activeKey=null;activeData=p.plainData||emptyUserData();showMain()
+  }
+}
+async function unlockProfile(){
+  const p=getProfile(pendingUnlockId),pin=$("unlockPasscode").value;
+  if(!/^\d{4}$/.test(pin))return $("unlockStatus").textContent="4桁の数字を入力してください。";
+  try{
+    const key=await deriveKey(pin,ub(p.salt));const data=await decryptObj(p.payload,key);
+    activeProfileId=p.id;activeKey=key;activeData=data;pendingUnlockId=null;showMain()
+  }catch{$("unlockStatus").textContent="暗証番号を確認してください。"}
+}
+function showMain(){
+  const p=activeProfile(),day=todayJst();showOnly("mainScreen");
+  $("activeEmoji").textContent=p.emoji||"🐑";$("activeName").textContent=p.name;$("jstDateLabel").textContent=`${day} JST`;$("medicationDay").value=day;
+  const first=activeData.lastOpenedDay!==day;
+  $("openGreeting").innerHTML=`<strong>🐑ペトラ</strong>${first?"こんにちは。今日の記録を開きました。":"続きから確認できます。"}<br><span class="muted small">必要なところだけ、あとから編集できます。</span>`;
+  activeData.lastOpenedDay=day;persistActive();renderAll()
+}
+function switchProfile(){activeProfileId=null;activeData=null;activeKey=null;renderProfiles();showOnly("profileScreen")}
+function currentDay(){return $("medicationDay").value||todayJst()}
+function ensureDay(d){
+  activeData.dailyLogs[d]??={entries:{},other:[],note:"",savedAt:null};
+  for(const m of activeData.medications)activeData.dailyLogs[d].entries[m.id]??={morning:0,noon:0,evening:0,bedtime:0,prn:0};
+  return activeData.dailyLogs[d]
+}
+function total(d,id){const e=ensureDay(d).entries[id]||{};return SLOT_KEYS.reduce((s,k)=>s+(+e[k]||0),0)}
+
+function renderToday(){
+  const d=currentDay(),log=ensureDay(d),host=$("medicationGrid");host.innerHTML="";$("dailyNote").value=log.note||"";
+  const meds=activeData.medications.filter(m=>!m.archived);
+  if(!meds.length)host.innerHTML='<div class="panel">表示中の薬はありません。「薬の登録」から追加できます。</div>';
+  for(const m of meds){
+    const card=document.createElement("article");card.className="med-card";
+    card.innerHTML=`<div class="med-title"><div><h3>${esc(m.name)} ${esc(m.strength||"")}</h3><div class="muted small">${m.category==="regular"?"常備薬":m.category==="other"?"その他":"処方薬"}／${esc(m.instructions||"")}</div></div><span class="badge">目安 ${m.expectedDaily||0}${esc(m.unit)}</span></div>
+    <div class="slot-grid">${SLOT_KEYS.map(s=>`<div class="slot"><div class="slot-label">${SLOT_LABELS[s]}</div><div class="counter"><button data-delta="-1" data-med="${m.id}" data-slot="${s}">−</button><div id="count-${m.id}-${s}" class="counter-value">${log.entries[m.id][s]||0}</div><button data-delta="1" data-med="${m.id}" data-slot="${s}">＋</button></div></div>`).join("")}</div>
+    <div class="total-row"><span>本日合計</span><strong id="total-${m.id}">${total(d,m.id)}${esc(m.unit)}</strong></div>`;
+    host.appendChild(card)
+  }
+  host.querySelectorAll("[data-delta]").forEach(b=>b.onclick=async()=>{
+    const e=ensureDay(d).entries[b.dataset.med],s=b.dataset.slot;e[s]=Math.max(0,(+e[s]||0)+Number(b.dataset.delta));
+    $(`count-${b.dataset.med}-${s}`).textContent=e[s];const m=activeData.medications.find(x=>x.id===b.dataset.med);$(`total-${m.id}`).textContent=total(d,m.id)+m.unit;
+    await persistActive();renderReview()
+  });
+  renderOther()
+}
+function renderOther(){
+  const log=ensureDay(currentDay()),host=$("otherList");host.innerHTML="";
+  log.other.forEach(o=>{
+    const x=document.createElement("div");x.className="other-card";
+    x.innerHTML=`<div class="list-item-head"><div><strong>${esc(o.label)}</strong><div class="muted small">${SLOT_LABELS[o.slot]}・${o.amount}${esc(o.unit)}</div></div><button data-remove-other="${o.id}">削除</button></div>`;
+    host.appendChild(x)
+  });
+  host.querySelectorAll("[data-remove-other]").forEach(b=>b.onclick=async()=>{log.other=log.other.filter(o=>o.id!==b.dataset.removeOther);await persistActive();renderOther()})
+}
+async function addOther(){
+  const label=$("otherLabel").value.trim(),amount=Number($("otherAmount").value);
+  if(!label||!amount)return $("otherStatus").textContent="名称と使用数を確認してください。";
+  ensureDay(currentDay()).other.push({id:uid(),label,slot:$("otherSlot").value,amount,unit:$("otherUnit").value,recordedAt:nowJst()});
+  $("otherLabel").value="";$("otherAmount").value=1;$("otherStatus").textContent="その他として記録しました。";await persistActive();renderOther()
+}
+
+function renderMeds(){
+  const host=$("registeredMedicationList");host.innerHTML="";
+  activeData.medications.filter(m=>!m.archived).forEach(m=>{
+    const x=document.createElement("div");x.className="list-item";
+    x.innerHTML=`<div class="list-item-head"><div><strong>${esc(m.name)} ${esc(m.strength||"")}</strong><div class="muted small">${m.category==="regular"?"常備薬":m.category==="other"?"その他":"処方薬"}／1日量 ${m.expectedDaily||0}${esc(m.unit)}／${esc(m.instructions||"")}</div></div>
+    <div class="inline-actions"><button data-edit="${m.id}">編集</button><button data-archive="${m.id}">一覧から外す</button></div></div>`;
+    host.appendChild(x)
+  });
+  host.querySelectorAll("[data-archive]").forEach(b=>b.onclick=async()=>{const m=activeData.medications.find(x=>x.id===b.dataset.archive);m.archived=true;m.archivedAt=nowJst();await persistActive();renderAll()});
+  host.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>{const m=activeData.medications.find(x=>x.id===b.dataset.edit);$("medName").value=m.name;$("medStrength").value=m.strength||"";$("medCategory").value=m.category||"prescribed";$("medUnit").value=m.unit;$("medExpected").value=m.expectedDaily||0;$("medInstructions").value=m.instructions||"";$("addMedicationBtn").dataset.edit=m.id;$("addMedicationBtn").textContent="変更を保存"})
+}
+function renderArchive(){
+  const host=$("archivedMedicationList");host.innerHTML="";
+  const meds=activeData.medications.filter(m=>m.archived);
+  if(!meds.length)host.innerHTML='<div class="panel">非表示の薬はありません。</div>';
+  meds.forEach(m=>{
+    const x=document.createElement("div");x.className="list-item";
+    x.innerHTML=`<div class="list-item-head"><div><strong>${esc(m.name)} ${esc(m.strength||"")}</strong><div class="archive-label">一覧から外した薬</div></div><div class="inline-actions"><button data-restore="${m.id}">復元</button><button class="danger" data-delete="${m.id}">完全に削除</button></div></div>`;
+    host.appendChild(x)
+  });
+  host.querySelectorAll("[data-restore]").forEach(b=>b.onclick=async()=>{const m=activeData.medications.find(x=>x.id===b.dataset.restore);m.archived=false;delete m.archivedAt;await persistActive();renderAll()});
+  host.querySelectorAll("[data-delete]").forEach(b=>b.onclick=async()=>{if(!confirm("薬剤登録を完全に削除します。過去の日別記録は残ります。"))return;activeData.medications=activeData.medications.filter(m=>m.id!==b.dataset.delete);await persistActive();renderAll()})
+}
+async function addMed(){
+  const name=$("medName").value.trim();if(!name)return alert("薬剤名を入力してください。");
+  const id=$("addMedicationBtn").dataset.edit||uid();
+  const med={id,name,strength:$("medStrength").value.trim(),category:$("medCategory").value,unit:$("medUnit").value,expectedDaily:Number($("medExpected").value)||0,instructions:$("medInstructions").value.trim(),archived:false};
+  const i=activeData.medications.findIndex(m=>m.id===id);i>=0?activeData.medications[i]=med:activeData.medications.push(med);
+  ["medName","medStrength","medInstructions"].forEach(x=>$(x).value="");$("medExpected").value=0;delete $("addMedicationBtn").dataset.edit;$("addMedicationBtn").textContent="薬剤を登録";
+  await persistActive();renderAll()
+}
+
+function parseMedicationLine(line){
+  const parts=line.trim().split(/[｜|]/).map(x=>x.trim()).filter(Boolean),head=parts[0]||"";
+  const sm=head.match(/(\d+(?:\.\d+)?\s*(?:mg|ｍｇ|g|μg|mcg))/i),strength=sm?sm[1]:"",name=head.replace(strength,"").replace(/^[-・•\s]+/,"").trim();
+  const source=parts.slice(1).join(" / ");const dm=source.match(/1回\s*(\d+(?:\.\d+)?)\s*(錠|カプセル|包|mL|回)/i),tm=source.match(/1日\s*(\d+(?:\.\d+)?)\s*回/),em=source.match(/1日量\s*(\d+(?:\.\d+)?)\s*(錠|カプセル|包|mL|回)/i);
+  let unit=dm?.[2]||em?.[2]||"錠",expected=em?Number(em[1]):(dm&&tm?Number(dm[1])*Number(tm[1]):0);
+  return{id:uid(),name:name||head,strength,category:"prescribed",unit,expectedDaily:expected,instructions:source}
+}
+function parseBulk(){
+  const lines=$("bulkMedicationText").value.split(/\n/).map(x=>x.trim()).filter(x=>x&&!/^薬剤名[｜|]/.test(x));
+  bulkCandidates=lines.map(parseMedicationLine).filter(x=>x.name);renderBulk();$("bulkMedicationStatus").textContent=`${bulkCandidates.length}件の候補を読み取りました。`; $("registerBulkMedicationBtn").classList.toggle("hidden",!bulkCandidates.length)
+}
+function renderBulk(){
+  const host=$("bulkMedicationCandidates");host.innerHTML="";
+  bulkCandidates.forEach((c,i)=>{
+    const x=document.createElement("div");x.className="import-card";
+    x.innerHTML=`<div class="form-grid"><label>薬剤名<input data-bi="${i}" data-bf="name" value="${esc(c.name)}"></label><label>規格<input data-bi="${i}" data-bf="strength" value="${esc(c.strength)}"></label><label>分類<select data-bi="${i}" data-bf="category"><option value="prescribed">処方薬</option><option value="regular">常備薬</option><option value="other">その他</option></select></label><label>単位<select data-bi="${i}" data-bf="unit">${["錠","カプセル","包","mL","回"].map(u=>`<option ${u===c.unit?"selected":""}>${u}</option>`).join("")}</select></label><label>1日量<input type="number" step="0.5" data-bi="${i}" data-bf="expectedDaily" value="${c.expectedDaily}"></label><label>用法<input data-bi="${i}" data-bf="instructions" value="${esc(c.instructions)}"></label></div><button data-br="${i}">除外</button>`;
+    host.appendChild(x)
+  });
+  host.querySelectorAll("[data-bf]").forEach(e=>e.oninput=()=>{const i=Number(e.dataset.bi),f=e.dataset.bf;bulkCandidates[i][f]=f==="expectedDaily"?Number(e.value)||0:e.value});
+  host.querySelectorAll("[data-br]").forEach(b=>b.onclick=()=>{bulkCandidates.splice(Number(b.dataset.br),1);renderBulk();$("registerBulkMedicationBtn").classList.toggle("hidden",!bulkCandidates.length)})
+}
+async function registerBulk(){bulkCandidates.forEach(c=>activeData.medications.push({...c,id:uid(),archived:false}));const n=bulkCandidates.length;bulkCandidates=[];$("bulkMedicationText").value="";renderBulk();$("registerBulkMedicationBtn").classList.add("hidden");$("bulkMedicationStatus").textContent=`${n}件を登録しました。`;await persistActive();renderAll()}
+
+async function runOcr(){
+  const f=$("ocrImage").files[0];if(!f)return alert("画像を選択してください。");if(!window.Tesseract)return alert("OCRを読み込めません。");
+  $("ocrStatus").textContent="読み取り中…";
+  try{const r=await Tesseract.recognize(f,"jpn+eng",{logger:m=>{if(m.status==="recognizing text")$("ocrStatus").textContent=`読み取り中 ${Math.round((m.progress||0)*100)}%`}});$("ocrText").value=r.data.text||"";$("ocrStatus").textContent="完了。原資料と照合してください。"}catch{$("ocrStatus").textContent="OCRに失敗しました。"}
+}
+function parseOcr(){
+  const ls=$("ocrText").value.split(/\n/).map(x=>x.trim()).filter(Boolean),line=ls.find(x=>/(錠|カプセル|mg|ｍｇ)/.test(x))||ls[0]||"",sm=line.match(/\d+(?:\.\d+)?\s*(?:mg|ｍｇ|g|μg)/i),s=sm?.[0]||"";
+  $("medName").value=line.replace(s,"").trim();$("medStrength").value=s;$("medInstructions").value=ls.slice(1,4).join(" / ");$("ocrStatus").textContent="候補を入力欄へ反映しました。"
+}
+
+function renderReview(){
+  const host=$("reviewSummary");host.innerHTML="";let less=0,more=0;
+  activeData.medications.filter(m=>!m.archived).forEach(m=>{
+    const a=total(currentDay(),m.id),e=Number(m.expectedDaily)||0,d=a-e;if(d<0)less++;if(d>0)more++;
+    const x=document.createElement("div");x.className="list-item";x.innerHTML=`<strong>${esc(m.name)} ${esc(m.strength||"")}</strong><div class="muted small">目安 ${e}${esc(m.unit)}／記録 ${a}${esc(m.unit)}</div><div>${d===0?"差分なし":d>0?`目安より ${d}${m.unit} 多い記録`:`目安より ${Math.abs(d)}${m.unit} 少ない記録`}</div>`;host.appendChild(x)
+  });
+  const msg=!less&&!more?"今日の記録では、目安との差はありません。内容を確認して保存できます。":less&&!more?"今日は目安より少ない記録があります。入力漏れでなければ、このまま保存できます。":more&&!less?"今日は目安より多い記録があります。内容を確認して、このまま保存することもできます。":"今日は目安より少ない記録と多い記録があります。内容を確認して保存できます。";
+  $("petraReviewMessage").innerHTML=`<strong>🐑ペトラ</strong>${msg}<br><span class="muted small">必要があれば、あとから編集できます。</span>`;
+  const r=activeData.dailyReviews[currentDay()];document.querySelectorAll("[name=reviewStatus]").forEach(x=>x.checked=false);$("reviewNote").value="";
+  if(r){document.querySelector(`[name=reviewStatus][value="${r.status}"]`)?.click();$("reviewNote").value=r.note||""}
+}
+async function saveToday(){const l=ensureDay(currentDay());l.note=$("dailyNote").value.trim();l.savedAt=nowJst();await persistActive();$("todayStatus").textContent="今日の記録を保存しました。あとから編集できます。"}
+async function saveReview(){const r=document.querySelector("[name=reviewStatus]:checked");if(!r)return alert("状態を選択してください。");activeData.dailyReviews[currentDay()]={status:r.value,note:$("reviewNote").value.trim(),reviewedAt:nowJst()};await persistActive();$("reviewStatusMessage").textContent="あとで見返せるように、この内容で記録しました。"}
+
+function renderSettings(){
+  const p=activeProfile();$("editProfileName").value=p.name;$("editProfileEmoji").value=p.emoji||"🐑";$("reminderTime").value=activeData.settings.reminderTime||"21:00";updatePrompt();
+  const child=p.type==="child";$("childPasscodeNotice").classList.toggle("hidden",!child);$("passcodeGeneralControls").classList.toggle("hidden",child);
+  if(!child){$("passcodeStateText").textContent=p.passcodeEnabled?"現在：暗証番号ON":"現在：暗証番号OFF";$("enablePasscodeArea").classList.toggle("hidden",p.passcodeEnabled);$("disablePasscodeArea").classList.toggle("hidden",!p.passcodeEnabled)}
+}
+async function saveProfileSettings(){const p=activeProfile();p.name=$("editProfileName").value.trim()||p.name;p.emoji=$("editProfileEmoji").value.trim()||"🐑";saveHousehold();$("activeName").textContent=p.name;$("activeEmoji").textContent=p.emoji;$("profileSettingsStatus").textContent="プロフィールを保存しました。"}
+async function enablePasscode(){
+  const p=activeProfile(),a=$("newPasscode").value,b=$("newPasscodeConfirm").value;if(p.type==="child")return;if(!/^\d{4}$/.test(a)||a!==b)return $("passcodeSettingsStatus").textContent="同じ4桁の数字を入力してください。";
+  const salt=rb(16),key=await deriveKey(a,salt);p.passcodeEnabled=true;p.salt=b64(salt);p.payload=await encryptObj(activeData,key);delete p.plainData;activeKey=key;saveHousehold();$("passcodeSettingsStatus").textContent="暗証番号をONにしました。";renderSettings()
+}
+async function disablePasscode(){
+  const p=activeProfile(),pin=$("currentPasscodeForDisable").value;try{const key=await deriveKey(pin,ub(p.salt));await decryptObj(p.payload,key);p.passcodeEnabled=false;p.plainData=activeData;delete p.payload;delete p.salt;activeKey=null;saveHousehold();$("passcodeSettingsStatus").textContent="暗証番号をOFFにしました。";renderSettings()}catch{$("passcodeSettingsStatus").textContent="現在の暗証番号を確認してください。"}
+}
+function updatePrompt(){const t=$("reminderTime").value||"21:00";$("reminderPrompt").value=`毎日${t}（日本時間）に、「今日の服薬記録を確認できます。必要なら、使った数と一日の状態を記録してください」と通知してください。服薬を指示する通知ではなく、記録確認だけにしてください。`}
+async function exportBackup(){const p=activeProfile(),blob=new Blob([JSON.stringify({app:"SHEEP Medication Record",version:2,profile:{name:p.name,emoji:p.emoji,type:p.type},data:activeData},null,2)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=`sheep-${p.name}-${todayJst()}.json`;a.click();URL.revokeObjectURL(a.href)}
+async function importBackup(file){const d=JSON.parse(await file.text());if(!d.data)throw new Error();activeData=d.data;await persistActive();renderAll();$("backupStatus").textContent="バックアップを読み込みました。"}
+
+function renderAll(){renderToday();renderMeds();renderArchive();renderReview();renderSettings()}
+function createProfile(){
+  const name=$("newProfileName").value.trim(),emoji=$("newProfileEmoji").value.trim()||"🐑",type=document.querySelector("[name=newProfileType]:checked").value;
+  if(!name)return $("addProfileStatus").textContent="表示名を入力してください。";
+  if(household.profiles.filter(p=>!p.archived).length>=4)return $("addProfileStatus").textContent="利用者は4人までです。";
+  household.profiles.push({id:uid(),name,emoji,type,passcodeEnabled:false,plainData:emptyUserData(),createdAt:nowJst(),archived:false});saveHousehold();$("newProfileName").value="";$("newProfileEmoji").value="";renderProfiles();showOnly("profileScreen")
+}
+
+document.addEventListener("DOMContentLoaded",()=>{
+  renderProfiles();showOnly("profileScreen");
+  $("showAddProfileBtn").onclick=()=>showOnly("addProfileScreen");$("cancelAddProfileBtn").onclick=()=>showOnly("profileScreen");$("createProfileBtn").onclick=createProfile;
+  $("profileList").onclick=e=>{const b=e.target.closest("[data-open]");if(b)openProfile(b.dataset.open)};
+  $("cancelUnlockBtn").onclick=()=>showOnly("profileScreen");$("unlockBtn").onclick=unlockProfile;$("unlockPasscode").onkeydown=e=>{if(e.key==="Enter")unlockProfile()};
+  $("switchProfileBtn").onclick=switchProfile;$("lockBtn").onclick=switchProfile;
+  document.querySelectorAll(".tab").forEach(t=>t.onclick=()=>{document.querySelectorAll(".tab,.tab-panel").forEach(x=>x.classList.remove("active"));t.classList.add("active");$(`tab-${t.dataset.tab}`).classList.add("active");if(t.dataset.tab==="review")renderReview();if(t.dataset.tab==="settings")renderSettings()});
+  $("medicationDay").onchange=renderAll;$("addOtherBtn").onclick=addOther;$("saveTodayBtn").onclick=saveToday;
+  $("addMedicationBtn").onclick=addMed;$("parseBulkMedicationBtn").onclick=parseBulk;$("registerBulkMedicationBtn").onclick=registerBulk;$("runOcrBtn").onclick=runOcr;$("parseOcrBtn").onclick=parseOcr;
+  $("saveReviewBtn").onclick=saveReview;$("saveProfileBtn").onclick=saveProfileSettings;$("enablePasscodeBtn").onclick=enablePasscode;$("disablePasscodeBtn").onclick=disablePasscode;
+  $("reminderTime").onchange=async()=>{activeData.settings.reminderTime=$("reminderTime").value;updatePrompt();await persistActive()};
+  $("copyReminderPromptBtn").onclick=async()=>{updatePrompt();try{await navigator.clipboard.writeText($("reminderPrompt").value)}catch{$("reminderPrompt").select();document.execCommand("copy")}};
+  $("exportBtn").onclick=exportBackup;$("importFile").onchange=async e=>{try{await importBackup(e.target.files[0])}catch{$("backupStatus").textContent="バックアップを読み込めませんでした。"}}
+});
+</script>
+</body>
+</html>
