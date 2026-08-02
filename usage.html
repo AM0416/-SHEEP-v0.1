@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#6f7f91">
+<title>実際に使用した薬の数｜SHEEP</title>
+<style>
+:root{
+  color-scheme:light dark;
+  --bg:#eef1f4;
+  --panel:#ffffff;
+  --text:#24313d;
+  --muted:#687786;
+  --border:#ccd4dc;
+  --accent:#6f7f91;
+  --accent2:#536578;
+  --soft:#eef5f0;
+  --system:#edf5fb;
+  --warn:#fff6df;
+  --patra:#f2eef8;
+}
+@media(prefers-color-scheme:dark){
+  :root{
+    --bg:#151a1f;
+    --panel:#20272e;
+    --text:#eef3f7;
+    --muted:#aeb8c2;
+    --border:#3d4853;
+    --accent:#93a4b5;
+    --accent2:#b2c0cd;
+    --soft:#1e2b23;
+    --system:#1d2933;
+    --warn:#312d23;
+    --patra:#292333;
+  }
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Sans","Yu Gothic",sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.85;
+}
+main{
+  max-width:900px;
+  margin:0 auto;
+  padding:20px;
+}
+a{color:var(--accent2)}
+.hero,.panel{
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:22px;
+  margin-bottom:18px;
+}
+.hero h1{
+  margin:0 0 8px;
+  font-size:clamp(1.7rem,5vw,2.4rem);
+  line-height:1.35;
+}
+.hero p{margin:0;color:var(--muted)}
+h2{font-size:1.3rem;margin-top:0}
+h3{font-size:1.08rem}
+ul{padding-left:1.3rem}
+li{margin:.45rem 0}
+.petra{
+  border-left:5px solid var(--accent);
+  background:var(--soft);
+}
+.system{
+  border-left:5px solid #6d99b8;
+  background:var(--system);
+}
+.warning{
+  border-left:5px solid #b68b35;
+  background:var(--warn);
+}
+.patra{
+  border-left:5px solid #8b77a5;
+  background:var(--patra);
+}
+.speaker{
+  display:block;
+  font-weight:700;
+  margin-bottom:8px;
+}
+.record-start{
+  display:grid;
+  gap:6px;
+  padding:14px;
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:var(--bg);
+  margin-bottom:16px;
+}
+.record-start strong{font-size:1.1rem}
+.calendar-wrap{
+  display:grid;
+  gap:8px;
+  max-width:320px;
+}
+input[type="date"]{
+  width:100%;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:11px 12px;
+  background:var(--panel);
+  color:var(--text);
+  font:inherit;
+}
+.example{
+  margin:14px 0;
+  padding:16px;
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:var(--bg);
+  white-space:pre-wrap;
+}
+.stats{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+.stat{
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:14px;
+  background:var(--bg);
+}
+.stat span{
+  display:block;
+  color:var(--muted);
+  font-size:.9rem;
+}
+.stat strong{
+  display:block;
+  margin-top:4px;
+  font-size:1.35rem;
+}
+.back-link{
+  display:inline-block;
+  margin-bottom:14px;
+  text-decoration:none;
+}
+.footer-note{
+  text-align:center;
+  color:var(--muted);
+  font-size:.9rem;
+  padding:8px 0 24px;
+}
+u{
+  text-decoration-thickness:2px;
+  text-underline-offset:3px;
+}
+@media(max-width:620px){
+  .stats{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<main>
+  <a class="back-link" href="index.html">← SHEEP服薬記録へ戻る</a>
+
+  <section class="hero">
+    <h1>🐑🌿<br>実際に使用した薬の数</h1>
+    <p>SHEEPへ記録した内容を、日付や期間ごとに確認します。</p>
+  </section>
+
+  <section class="panel">
+    <h2>🌱 はじめに</h2>
+    <p>このページでは、SHEEP服薬記録へ入力した内容から、実際に使用した薬の数を確認できます。</p>
+    <p>表示されるのは、<strong>SHEEPへ記録した内容</strong>です。</p>
+    <p>処方された数量ではありません。</p>
+  </section>
+
+  <section class="panel petra">
+    <span class="speaker">🐑ペトラ</span>
+    <p>今日までの記録を、あとから見返せます。</p>
+    <p>気になる日があれば、その日の記録へ戻って確認できます。</p>
+  </section>
+
+  <section class="panel">
+    <h2>👤 現在の利用者</h2>
+    <div class="example">🐻 わたし の記録</div>
+    <p>家族で利用している場合は、別の利用者の記録を見ていないか確認してください。</p>
+  </section>
+
+  <section class="panel">
+    <h2>📅 記録開始日</h2>
+    <div class="record-start">
+      <span>記録開始日</span>
+      <strong>2026年8月2日</strong>
+    </div>
+    <p>この利用者が、SHEEPへ最初の記録を残した日です。</p>
+
+    <h2>📅 日付を選ぶ</h2>
+    <div class="calendar-wrap">
+      <label for="recordDate">カレンダー</label>
+      <input id="recordDate" type="date" max="2026-08-02">
+    </div>
+    <p>カレンダーから、過去の日付を選べます。</p>
+    <p>未来の日付は選択できません。</p>
+  </section>
+
+  <section class="panel system">
+    <span class="speaker">🐑SHEEPシステム🌿</span>
+    <p>記録がある日を選ぶと、その日の内容を確認できます。</p>
+  </section>
+
+  <section class="panel">
+    <h2>📄 その日の記録</h2>
+    <div class="example">利用者
+わたし
+
+日付
+2026年8月15日
+
+〇〇〇錠100mg
+朝　2錠
+昼　0錠
+夕　2錠
+就寝前　0錠
+頓用　0錠
+
+合計　4錠
+
+胃薬
+昼　1回
+
+鎮痛剤
+頓用　1回</div>
+  </section>
+
+  <section class="panel">
+    <h2>💊 薬ごとの記録</h2>
+    <h3>〇〇〇錠100mg</h3>
+    <div class="stats">
+      <div class="stat"><span>今日</span><strong>4錠</strong></div>
+      <div class="stat"><span>今月</span><strong>118錠</strong></div>
+      <div class="stat"><span>今年</span><strong>842錠</strong></div>
+      <div class="stat"><span>累計</span><strong>1,284錠</strong></div>
+    </div>
+
+    <div class="example">使用した日数　842日
+
+記録開始　2023年4月12日</div>
+
+    <p>「使用した日数」は、処方日数ではなく、SHEEPへ使用記録がある日数です。</p>
+    <p>「記録開始」は、その薬について最初の使用記録がある日です。</p>
+    <p>薬を実際に飲み始めた日と一致しない場合があります。</p>
+  </section>
+
+  <section class="panel">
+    <h2>➕ 「その他」の使用数</h2>
+    <div class="example">胃薬
+
+今日　1回
+今月　4回
+累計　42回</div>
+
+    <p>同じ名称と単位で記録されたものをまとめます。</p>
+    <p>「胃薬・1錠」と「胃薬・1回」は、単位が異なるため別々に表示します。</p>
+  </section>
+
+  <section class="panel">
+    <h2>📦 単位について</h2>
+    <p>SHEEPでは、単位ごとに集計します。</p>
+    <ul>
+      <li>錠</li>
+      <li>カプセル</li>
+      <li>包</li>
+      <li>mL</li>
+      <li>回</li>
+    </ul>
+    <p><u>違う単位は合計しません。</u></p>
+    <p>例えば、10錠と5mLを「合計15」とは表示しません。</p>
+  </section>
+
+  <section class="panel system">
+    <span class="speaker">🐑SHEEPシステム🌿</span>
+    <p>表示している数は、SHEEPへ記録した内容です。</p>
+    <p>処方された数量ではありません。</p>
+  </section>
+
+  <section class="panel warning">
+    <h2>⚠️ 集計について</h2>
+    <p>このページは、記録を見返すためのページです。</p>
+    <p><u>入力していない薬は集計されません。</u></p>
+    <p><u>入力を忘れた日は、自動では補えません。</u></p>
+    <p><u>SHEEPを使い始める前に使用した薬は含まれません。</u></p>
+    <p><u>累計の数だけで、服薬状況の良し悪しは分かりません。</u></p>
+    <p>気になる日があれば、カレンダーからその日の記録を確認してください。</p>
+  </section>
+
+  <section class="panel">
+    <h2>✏️ 修正したいとき</h2>
+    <p>数量が違う場合は、その日の記録へ戻って修正してください。</p>
+    <p>保存すると、集計は自動で更新されます。</p>
+  </section>
+
+  <section class="panel system">
+    <span class="speaker">🐑SHEEPシステム🌿</span>
+    <p>集計結果は編集できません。</p>
+    <p>日付ごとの記録を修正してください。</p>
+  </section>
+
+  <section class="panel patra">
+    <span class="speaker">🌿パトラ</span>
+    <p>はじめまして。</p>
+    <p>私はパトラです。</p>
+    <p>SHEEPプロジェクト全体で、健康との関わりを一緒に整理する担当です。</p>
+    <p>ペトラが日々の服薬記録を支えるように、私は記録全体から健康との歩みを振り返るお手伝いをしています。</p>
+    <p>薬は、飲んだ数が多いことも、少ないことも、それだけで良い・悪いとは言えません。</p>
+    <p>大切なのは、<strong>「実際に薬とどう関わってきたか」</strong>を知ることです。</p>
+    <p>このページが、あなた自身の歩みを振り返るきっかけになればうれしいです。</p>
+  </section>
+
+  <p class="footer-note">SHEEP Project</p>
+</main>
+</body>
+</html>
